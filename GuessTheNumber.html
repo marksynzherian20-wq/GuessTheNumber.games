@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Угадай число | Желто-черный дизайн</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            color: #FFD700;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .game-container {
+            background-color: #1a1a1a;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+            border: 2px solid #FFD700;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            font-size: 2.2rem;
+        }
+        
+        .instructions {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            text-align: center;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+        }
+        
+        .input-section {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        input {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            background-color: #2a2a2a;
+            color: #FFD700;
+            outline: none;
+        }
+        
+        input::placeholder {
+            color: #666;
+        }
+        
+        button {
+            padding: 15px 25px;
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #FFC400;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .message {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .success {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+        
+        .error {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+            border: 1px solid #F44336;
+        }
+        
+        .info {
+            background-color: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+            border: 1px solid #FFD700;
+        }
+        
+        .attempts {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+        }
+        
+        .new-game {
+            display: block;
+            margin: 25px auto 0;
+            border-radius: 8px;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+        
+        .stat {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .hint {
+            margin-top: 15px;
+            text-align: center;
+            font-style: italic;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .input-section {
+                flex-direction: column;
+            }
+            
+            button {
+                border-radius: 0 0 8px 8px;
+            }
+            
+            input {
+                border-radius: 8px 8px 0 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>УГАДАЙ ЧИСЛО</h1>
+        
+        <div class="instructions">
+            <p>Я загадал число от 1 до 100. Попробуй угадать его!</p>
+            <p>После каждой попытки я скажу, больше или меньше твое число.</p>
+        </div>
+        
+        <div class="input-section">
+            <input type="number" id="guessInput" min="1" max="100" placeholder="Введите число от 1 до 100">
+            <button id="guessButton">УГАДАТЬ</button>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <div class="attempts">
+            Попытки: <span id="attemptsCount">0</span>
+        </div>
+        
+        <div class="game-stats">
+            <div class="stat">
+                <div class="stat-label">Минимум</div>
+                <div id="minValue" class="stat-value">1</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Максимум</div>
+                <div id="maxValue" class="stat-value">100</div>
+            </div>
+        </div>
+        
+        <div class="hint">
+            Подсказка: используйте стратегию бинарного поиска для быстрого результата!
+        </div>
+        
+        <button id="newGameButton" class="new-game">НОВАЯ ИГРА</button>
+    </div>
+
+    <script>
+        // Игровые переменные
+        let secretNumber;
+        let attempts;
+        let gameOver;
+        let minRange = 1;
+        let maxRange = 100;
+        
+        // Элементы DOM
+        const guessInput = document.getElementById('guessInput');
+        const guessButton = document.getElementById('guessButton');
+        const messageElement = document.getElementById('message');
+        const attemptsElement = document.getElementById('attemptsCount');
+        const newGameButton = document.getElementById('newGameButton');
+        const minValueElement = document.getElementById('minValue');
+        const maxValueElement = document.getElementById('maxValue');
+        
+        // Инициализация игры
+        function initGame() {
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            gameOver = false;
+            minRange = 1;
+            maxRange = 100;
+            
+            updateAttemptsDisplay();
+            updateRangeDisplay();
+            clearMessage();
+            guessInput.value = '';
+            guessInput.disabled = false;
+            guessButton.disabled = false;
+            
+            console.log('Загаданное число:', secretNumber); // Для отладки
+        }
+        
+        // Обновление счетчика попыток
+        function updateAttemptsDisplay() {
+            attemptsElement.textContent = attempts;
+        }
+        
+        // Обновление отображения диапазона
+        function updateRangeDisplay() {
+            minValueElement.textContent = minRange;
+            maxValueElement.textContent = maxRange;
+        }
+        
+        // Очистка сообщения
+        function clearMessage() {
+            messageElement.textContent = 'Введите число и нажмите "УГАДАТЬ"';
+            messageElement.className = 'message info';
+        }
+        
+        // Отображение сообщения
+        function showMessage(text, type) {
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+        }
+        
+        // Проверка предположения
+        function checkGuess() {
+            if (gameOver) return;
+            
+            const guess = parseInt(guessInput.value);
+            
+            // Проверка валидности ввода
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                showMessage('Пожалуйста, введите число от 1 до 100!', 'error');
+                return;
+            }
+            
+            attempts++;
+            updateAttemptsDisplay();
+            
+            // Проверка на угадывание
+            if (guess === secretNumber) {
+                showMessage(`ПОЗДРАВЛЯЮ! Вы угадали число ${secretNumber} за ${attempts} попыток!`, 'success');
+                gameOver = true;
+                guessInput.disabled = true;
+                guessButton.disabled = true;
+            } else if (guess < secretNumber) {
+                showMessage('Мое число БОЛЬШЕ!', 'info');
+                if (guess > minRange) {
+                    minRange = guess + 1;
+                    updateRangeDisplay();
+                }
+            } else {
+                showMessage('Мое число МЕНЬШЕ!', 'info');
+                if (guess < maxRange) {
+                    maxRange = guess - 1;
+                    updateRangeDisplay();
+                }
+            }
+            
+            guessInput.value = '';
+            guessInput.focus();
+        }
+        
+        // Обработчики событий
+        guessButton.addEventListener('click', checkGuess);
+        
+        guessInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkGuess();
+            }
+        });
+        
+        newGameButton.addEventListener('click', initGame);
+        
+        // Начало игры
+        initGame();
+    </script>
+</body>
+</html>
